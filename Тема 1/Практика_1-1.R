@@ -6,6 +6,9 @@
 ## Устанавливаем и подключаем нужные пакеты.
 ## tidyverse включает dplyr, ggplot2, tibble и др.
 
+# Установить зеркало по умолчанию (рекомендуется)
+# options(repos = "https://mirror.truenetwork.ru/CRAN/")
+
 install.packages("mlbench")    # датасеты, в т.ч. PimaIndiansDiabetes
 install.packages("pROC")       # ROC-кривая и AUC
 install.packages("tidyverse")  # dplyr, ggplot2 и др.
@@ -85,6 +88,40 @@ model_logit <- glm(
 # Сводка по модели: коэффициенты, значимость предикторов и т.д.
 summary(model_logit)
 
+## Сигмоидная функция (логистическая)
+# Извлекаем линейный предиктор η = β0 + βX и вероятность p
+test$eta <- predict(model_logit, newdata = test, type = "link")      # линейный предиктор
+test$prob <- predict(model_logit, newdata = test, type = "response") # вероятность (у вас уже есть)
+
+# Строим гладкую сигмоиду
+sigmoid <- function(x) 1 / (1 + exp(-x))
+
+eta_range <- range(test$eta)
+x_grid <- seq(eta_range[1] - 1, eta_range[2] + 1, length.out = 400)
+y_grid <- sigmoid(x_grid)
+
+plot(x_grid, y_grid,
+     type = "l", lwd = 2, col = "blue",
+     xlab = "Линейный предиктор η",
+     ylab = "Вероятность p",
+     main = "Сигмоидная функция и реальные предсказания")
+
+# Добавляем реальные точки (η, p) для тестовых наблюдений
+points(test$eta, test$prob,
+       pch = 16, col = rgb(1, 0, 0, 0.5))
+
+# Линия порога p = 0.5 (η = 0)
+abline(h = 0.5, lty = 2, col = "gray")
+abline(v = 0,   lty = 2, col = "gray")
+
+cols <- ifelse(test$diabetes == 1, "red", "darkgreen")
+points(test$eta, test$prob, pch = 16, col = adjustcolor(cols, alpha.f = 0.6))
+legend("topleft",
+       legend = c("diabetes = 1", "diabetes = 0"),
+       col    = c("red", "darkgreen"),
+       pch    = 16)
+
+
 ## Блок 5. Прогноз на тесте и классификация при пороге 0.5
 ## Сначала получаем предсказанные вероятности диабета,
 ## затем превращаем их в классы 0/1 по порогу.
@@ -149,7 +186,6 @@ plot(roc_obj,
      col  = "blue",
      lwd  = 2,
      main = paste("ROC (Pima, AUC =", round(auc_value, 3), ")"))
-abline(a = 0, b = 1, lty = 2, col = "gray")  # линия случайного угадывания
 
 ## Блок 8. Упражнение: влияние порога (0.3 и 0.7)
 ## Показываем trade-off между Sensitivity и Specificity при разных порогах.
@@ -171,4 +207,28 @@ check_threshold <- function(thr, probs, true_class) {
 }
 
 check_threshold(0.3, test$prob, test$diabetes)
+check_threshold(0.5, test$prob, test$diabetes)
 check_threshold(0.7, test$prob, test$diabetes)
+
+plot(x_grid, y_grid,
+     type = "l", lwd = 2, col = "blue",
+     xlab = "Линейный предиктор η",
+     ylab = "Вероятность p",
+     main = "Сигмоидная функция и реальные предсказания")
+
+# Добавляем реальные точки (η, p) для тестовых наблюдений
+points(test$eta, test$prob,
+       pch = 16, col = rgb(1, 0, 0, 0.5))
+
+# Линия порога p = 0.5 (η = 0)
+abline(h = 0.5, lty = 2, col = "gray")
+abline(v = 0,   lty = 2, col = "gray")
+abline(h = 0.3, lty = 2, col = "red")
+abline(h = 0.7, lty = 2, col = "blue")
+
+cols <- ifelse(test$diabetes == 1, "red", "darkgreen")
+points(test$eta, test$prob, pch = 16, col = adjustcolor(cols, alpha.f = 0.6))
+legend("topleft",
+       legend = c("diabetes = 1", "diabetes = 0"),
+       col    = c("red", "darkgreen"),
+       pch    = 16)
