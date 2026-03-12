@@ -3,6 +3,9 @@
 
 ## 1. Подготовка окружения ---------------------------------------------
 
+# Установить зеркало по умолчанию (рекомендуется)
+# options(repos = "https://mirror.truenetwork.ru/CRAN/")
+
 # Установите пакеты при необходимости:
 # install.packages(c("mlbench", "dplyr", "randomForest", "caret", "pROC"))
 
@@ -18,8 +21,8 @@ data(PimaIndiansDiabetes)
 pid <- PimaIndiansDiabetes
 
 # Удаляем строки с пропусками, кодируем исход как 0/1
-pid_clean <- pid |>
-  filter(complete.cases(.)) |>
+pid_clean <- pid %>%
+  filter(complete.cases(.)) %>%
   mutate(diabetes = ifelse(diabetes == "pos", "pos", "neg"))
 
 # Преобразуем в фактор с понятными уровнями для caret
@@ -51,11 +54,29 @@ rf_baseline <- randomForest(
 
 print(rf_baseline)
 
+## Функция для F1 (положительный класс = "pos")
+f1_score <- function(true, pred_class, positive = "pos") {
+  true <- factor(true, levels = c("neg", "pos"))
+  pred_class <- factor(pred_class, levels = c("neg", "pos"))
+  cm <- table(pred_class, true)
+  tp <- cm[positive, positive]
+  fp <- sum(cm[positive, ]) - tp
+  fn <- sum(cm[, positive]) - tp
+  precision <- tp / (tp + fp)
+  recall    <- tp / (tp + fn)
+  2 * precision * recall / (precision + recall)
+}
+
 # Оценка на тесте
 pred_baseline_prob <- predict(rf_baseline, newdata = test, type = "prob")[, "pos"]
 roc_baseline <- roc(test$diabetes, pred_baseline_prob)
 auc_baseline <- auc(roc_baseline)
 auc_baseline
+
+# Классы для baseline
+pred_baseline_class <- ifelse(pred_baseline_prob > 0.5, "pos", "neg")
+f1_baseline <- f1_score(test$diabetes, pred_baseline_class)
+f1_baseline
 
 ## 5. Grid Search: определение сетки гиперпараметров -------------------
 
@@ -82,7 +103,6 @@ ctrl <- trainControl(
 ## 7. Grid Search с caret ----------------------------------------------
 
 # Обучение с перебором гиперпараметров
-set.seed(123)
 grid_search <- train(
   diabetes ~ .,
   data      = train,
@@ -106,6 +126,11 @@ pred_best_prob <- predict(grid_search, newdata = test, type = "prob")[, "pos"]
 roc_best <- roc(test$diabetes, pred_best_prob)
 auc_best <- auc(roc_best)
 auc_best
+
+# Классы для лучшей модели (тот же порог 0.5)
+pred_best_class <- ifelse(pred_best_prob > 0.5, "pos", "neg")
+f1_best <- f1_score(test$diabetes, pred_best_class)
+f1_best
 
 # Сравнение базовой и настроенной модели
 comparison <- data.frame(
@@ -147,6 +172,10 @@ pred_random_prob <- predict(random_search, newdata = test, type = "prob")[, "pos
 roc_random <- roc(test$diabetes, pred_random_prob)
 auc_random <- auc(roc_random)
 auc_random
+
+pred_random_class <- ifelse(pred_random_prob > 0.5, "pos", "neg")
+f1_random <- f1_score(test$diabetes, pred_random_class)
+f1_random
 
 ## 10. Итоговое сравнение всех моделей ---------------------------------
 
