@@ -21,12 +21,12 @@
 # Установить зеркало по умолчанию (рекомендуется)
 # options(repos = "https://mirror.truenetwork.ru/CRAN/")
 
-install.packages("mlbench")
-install.packages("tidyverse")
-install.packages("cluster")
-install.packages("mclust")
-install.packages("factoextra")
-install.packages("pheatmap")
+# install.packages("mlbench")
+# install.packages("tidyverse")
+# install.packages("cluster")
+# install.packages("mclust")
+# install.packages("factoextra")
+# install.packages("pheatmap")
 
 library(mlbench)
 library(tidyverse)
@@ -266,6 +266,7 @@ pca_df <- pca_df %>%
   mutate(HierCluster = factor(hc_clusters))
 
 # Сравниваем визуально на PCA: слева K-means, справа Hierarchical
+install.packages("gridExtra")
 library(gridExtra)
 
 p1 <- ggplot(pca_df, aes(x = PC1, y = PC2, color = Cluster)) +

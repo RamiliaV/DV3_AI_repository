@@ -237,7 +237,7 @@ roc_rf    <- roc(true, test$prob_rf)
 
 # Рисуем ROC логистической регрессии
 plot(roc_logit, col = "blue", lwd = 2,
-     main = "ROC-кривые: LogReg, Tree, RF")
+     main = "ROC-кривые: LR, DT, RF")
 
 # Добавляем ROC для дерева и RF на тот же график
 plot(roc_tree, col = "red",      lwd = 2, add = TRUE)
@@ -245,7 +245,7 @@ plot(roc_rf,   col = "darkgreen", lwd = 2, add = TRUE)
 
 # Легенда
 legend("bottomright",
-       legend = c("LogReg", "Tree", "RF"),
+       legend = c("LR", "DT", "RF"),
        col    = c("blue", "red", "darkgreen"),
        lwd    = 2)
 
@@ -271,7 +271,7 @@ compute_metrics_threshold <- function(model_name, thr, probs, true_class) {
   )
 }
 
-thresholds <- c(0.3, 0.5, 0.7)
+thresholds <- c(0.3, 0.4, 0.5, 0.7)
 true <- test$diabetes
 
 results_list <- list()
