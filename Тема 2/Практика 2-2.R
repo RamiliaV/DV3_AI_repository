@@ -7,7 +7,7 @@
 # options(repos = "https://mirror.truenetwork.ru/CRAN/")
 
 # Установите пакеты при необходимости:
-# install.packages(c("mlbench", "dplyr", "randomForest", "caret", "pROC"))
+install.packages(c("mlbench", "dplyr", "randomForest", "caret", "pROC"))
 
 library(mlbench)
 library(dplyr)
@@ -198,21 +198,7 @@ legend("bottomright",
        col = c("gray", "blue", "red"),
        lwd = 2)
 
-## 12. Детальные результаты Grid Search --------------------------------
-
-# Посмотреть все результаты по fold'ам
-grid_search$results
-
-# Визуализация зависимости AUC от mtry
-ggplot(grid_search$results, aes(x = mtry, y = ROC)) +
-  geom_line(color = "blue", size = 1.2) +
-  geom_point(color = "blue", size = 3) +
-  labs(title = "Grid Search: AUC-ROC vs mtry",
-       x = "mtry (число признаков на разбиение)",
-       y = "Mean AUC-ROC (5-fold CV)") +
-  theme_minimal()
-
-## 13. Финальная модель с лучшими параметрами --------------------------
+## 12. Финальная модель с лучшими параметрами --------------------------
 
 # Переобучим финальную модель на всём train с лучшими параметрами
 final_rf <- randomForest(
@@ -228,18 +214,70 @@ print(final_rf)
 # Важность признаков в финальной модели
 varImpPlot(final_rf, main = "Feature Importance (Final Model)")
 
-## 14. Confusion Matrix на тесте ---------------------------------------
+## 13. SVM с RBF-ядром и Grid Search ----------------------------------
+## Требуется пакет kernlab (используется внутри caret)
 
-pred_final_class <- predict(final_rf, newdata = test, type = "class")
-cm_final <- confusionMatrix(pred_final_class, test$diabetes)
-cm_final
+# install.packages("kernlab")  # при необходимости
+library(kernlab)
 
-## 15. Выводы ----------------------------------------------------------
+# 13.1. Сетка гиперпараметров для svmRadial
+# C — штраф за ошибки; sigma — параметр ядра RBF
+grid_svm <- expand.grid(
+  C     = c(0.25, 1, 4),
+  sigma = c(0.01, 0.05, 0.1)
+)
 
-cat("\n=== ИТОГИ ПРАКТИКИ 2.2 ===\n")
-cat("Базовая модель (mtry=2): AUC =", round(auc_baseline, 3), "\n")
-cat("Grid Search (лучший mtry):", best_params$mtry, ", AUC =", round(auc_best, 3), "\n")
-cat("Random Search: AUC =", round(auc_random, 3), "\n")
-cat("\nУлучшение качества:", 
-    ifelse(auc_best > auc_baseline, "ДА", "НЕТ"), "\n")
-cat("Разница AUC:", round(auc_best - auc_baseline, 4), "\n")
+# 13.2. Обучение SVM с 5-fold CV по ROC
+set.seed(123)
+svm_grid <- train(
+  diabetes ~ .,
+  data      = train,
+  method    = "svmRadial",
+  trControl = ctrl,       # тот же trainControl, что и для RF
+  tuneGrid  = grid_svm,
+  metric    = "ROC"
+)
+
+print(svm_grid)
+plot(svm_grid)
+
+# Лучшая комбинация C и sigma
+svm_best <- svm_grid$bestTune
+svm_best
+
+# 13.3. Оценка лучшей SVM на тесте ------------------------------------
+
+# Предсказанные вероятности и классы
+prob_svm <- predict(svm_grid, newdata = test, type = "prob")[, "pos"]
+pred_svm <- predict(svm_grid, newdata = test, type = "raw")
+
+# AUC
+roc_svm <- roc(test$diabetes, prob_svm)
+auc_svm <- auc(roc_svm)
+auc_svm
+
+# F1 (используем ту же функцию f1_score, что и для RF)
+f1_svm <- f1_score(test$diabetes, pred_svm)
+f1_svm
+
+# 13.4. Сравнение RF vs SVM -------------------------------------------
+
+comparison_svm_rf <- data.frame(
+  model = c("Random Forest (best mtry)", "SVM RBF (best C, sigma)"),
+  AUC   = c(as.numeric(auc_best), as.numeric(auc_svm)),  # auc_best из RF
+  F1    = c(f1_best, f1_svm)                             # f1_best из RF
+)
+
+comparison_svm_rf
+
+# 13.5. Совместный ROC-график для RF и SVM ----------------------------
+
+plot(roc_best, col = "steelblue", lwd = 2,
+     main = "ROC-кривые: Random Forest vs SVM (Pima)")
+lines(roc_svm, col = "darkorange", lwd = 2)
+abline(a = 0, b = 1, lty = 2, col = "gray")
+
+legend("bottomright",
+       legend = c("Random Forest", "SVM RBF"),
+       col    = c("steelblue", "darkorange"),
+       lwd    = 2)

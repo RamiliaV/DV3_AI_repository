@@ -136,7 +136,7 @@ imp_df
 
 ## 9. Отбор топ-5 признаков по permutation importance -----------------
 
-top5 <- head(imp_df$feature[!is.na(imp_df$perm_importance)], 5)
+top5 <- head(imp_df$feature[!is.na(imp_df$gini_importance)], 5)
 top5
 
 # Формируем обучающие и тестовые наборы с топ-10 признаками
