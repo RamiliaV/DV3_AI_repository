@@ -256,7 +256,7 @@ imp_df
 
 ## 12b. EDA: boxplot для самого важного признака -----------------------
 
-top_feature <- imp_df$feature[1]
+top_feature <- imp_df$feature[2]
 top_feature
 
 if (is.numeric(train[[top_feature]])) {
