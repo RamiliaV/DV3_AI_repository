@@ -29,6 +29,23 @@ df <- LUAD.clinical
 
 ## 3. Препроцессинг -------------------------------------------------------
 
+df_surv <- df %>%
+  mutate(
+    # время: дни до смерти или последнего визита
+    time = dplyr::coalesce(
+      as.numeric(patient.days_to_death),
+      as.numeric(patient.days_to_last_followup)
+    ),
+    # статус: 1 = dead, 0 = цензурирован
+    vital_clean = tolower(trimws(patient.vital_status)),
+    status = ifelse(vital_clean == "dead", 1L, 0L),
+    # стадия из pathologic_stage
+    stage_raw = patient.stage_event.pathologic_stage
+  ) %>%
+  filter(!is.na(time),
+         !is.na(status),
+         !is.na(stage_raw))
+
 smoking_cols <- names(df)[grepl("smoking|tobacco", names(df), ignore.case = TRUE)]
 gender_cols <- names(df)[grepl("gender|sex", names(df), ignore.case = TRUE)]
 
@@ -52,7 +69,11 @@ df_surv <- df_surv %>%
       tolower(patient.gender) == "female" ~ "Female",
       TRUE ~ NA_character_
     )
-  )
+  ) %>%
+  filter(!is.na(time),
+         !is.na(status),
+         !is.na(stage_raw)) %>%
+  mutate(age = patient.age_at_initial_pathologic_diagnosis)
 
 df_surv$smoking <- factor(df_surv$smoking, levels = c("Never", "Former", "Smoker"))
 df_surv$gender <- factor(df_surv$gender, levels = c("Female", "Male"))
@@ -77,6 +98,8 @@ df_surv <- df_surv %>%
 
 # Время в годах
 df_surv$time_years <- df_surv$time / 365.25
+
+df_surv$age <- as.numeric(df_surv$age)
 
 cat("\nСтруктура данных для анализа:\n")
 cat("N =", nrow(df_surv), "\n")
@@ -160,7 +183,7 @@ print(significant, row.names = FALSE)
 # Forest plot для stage
 cat("\n--- Forest plot: stage ---\n")
 ggforest(cox_stage, data = df_surv,
-         main = "Одномерная Cox: стадия (TCGA-LUAD)")
+         main = "Cox: стадия (TCGA-LUAD)")
 
 cat("--- Forest plot smoking ---\n")
 ggforest(cox_smoking, data = df_surv, main = "Cox: статус курения (TCGA-LUAD)")
