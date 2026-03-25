@@ -193,11 +193,12 @@ if (any(stage_counts < 30)) {
   df_complete <- df_complete %>%
     mutate(
       stage_collapsed = case_when(
-        stage %in% c("I", "II")    ~ "Early (I-II)",
+        stage %in% c("I")    ~ "I",
+        stage %in% c("II")    ~ "II",
         stage %in% c("III", "IV")  ~ "Late (III-IV)"
       ),
       stage_collapsed = factor(stage_collapsed,
-                               levels = c("Early (I-II)", "Late (III-IV)"))
+                               levels = c("I", "II", "Late (III-IV)"))
     )
   
   cox_collapsed <- coxph(
@@ -314,7 +315,7 @@ cat("  Cox учитывает цензурирование, классифика
 ## 15. ROC-кривые сравнения -----------------------------------------------
 
 plot(roc_logit, col = "steelblue", lwd = 2,
-     main = "ROC: классификация vs Cox (5-летний горизонт)")
+     main = "ROC: классификация vs Cox (2-летний горизонт)")
 lines(roc_rf, col = "forestgreen", lwd = 2)
 abline(a = 0, b = 1, lty = 2, col = "gray")
 
@@ -374,13 +375,63 @@ ggsurvplot(
 
 cat("\n--- Cox с риск-скором как ковариатой ---\n")
 cox_with_risk <- coxph(
-  Surv(time_years, status) ~ risk_score_logit,
+  Surv(time_years, status) ~ risk_score_logit + age + stage + smoking + gender,
   data = df_class
 )
 print(summary(cox_with_risk))
 
 c_risk <- concordance(cox_with_risk)$concordance
 cat(sprintf("C-index (Cox + risk score): %.4f\n", c_risk))
+
+library(timeROC)
+
+## 1. Линейный предиктор Cox (risk score)
+df_complete$risk_score <- predict(cox_multi, type = "lp")
+
+## 2. Выбираем временные точки (в годах)
+times_years <- c(2, 5, 10, 12, 15)
+
+## Переводим в те же единицы, что и time (если time в годах — можно так и оставить)
+times <- times_years
+
+## 3. Расчёт time-dependent ROC и AUC
+roc_cox <- timeROC(
+  T      = df_complete$time_years,
+  delta  = df_complete$status,
+  marker = df_complete$risk_score,
+  cause  = 1,                  # событие = смерть
+  times  = times,
+  iid    = TRUE
+)
+
+roc_cox$AUC    # AUC(t) для выбранных времён
+roc_cox$times  # какие t реально использованы
+
+cols <- c("steelblue", "darkorange", "forestgreen", "red", "yellow")
+
+# первая кривая
+plot(
+  roc_cox$FP[, 1],  roc_cox$TP[, 1],
+  type = "l", lwd = 2, col = cols[1],
+  xlab = "Специфичность",
+  ylab = "Чувствительность",
+  main = "Time-dependent ROC для Cox-модели (1, 3, 5 лет)"
+)
+
+# остальные
+lines(roc_cox$FP[, 2], roc_cox$TP[, 2], col = cols[2], lwd = 2)
+lines(roc_cox$FP[, 3], roc_cox$TP[, 3], col = cols[3], lwd = 2)
+lines(roc_cox$FP[, 4], roc_cox$TP[, 4], col = cols[4], lwd = 2)
+lines(roc_cox$FP[, 5], roc_cox$TP[, 5], col = cols[5], lwd = 2)
+
+abline(0, 1, lty = 2, col = "gray")
+
+legend(
+  "bottomright",
+  legend = paste0("t = ", times, ", AUC = ",
+                  sprintf("%.2f", roc_cox$AUC)),
+  col = cols, lwd = 2, bty = "n"
+)
 
 ## 19. Итоговое сравнение всех подходов ------------------------------------
 
