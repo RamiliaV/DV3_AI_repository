@@ -134,8 +134,28 @@ https://rutube.ru/video/private/ecb65eee35adbadc019fa082d46309b1/?p=k_8Qg48B2AOt
 
 **Практика:**
 - `Практика 4-1.r` — построение ко-экспрессионной сети, WGCNA
+  
+  Видео:
+  
+  https://rutube.ru/video/private/6f7dfb108a29ef104aa1e51ead183474/?p=U0KWrMoDtm3BuJLNJdH0lg
+
+  https://rutube.ru/video/private/9ac99e312a131f0bd1e83022cd589f59/?p=hBuG9iL439M8M8j-L3UN_Q
+
 - `Практика 4-2.r` — идентификация модулей и хаб-генов
-- `Практика 4-3.r` — функциональное обогащение, интеграция с моделями выживаемост
+    
+  Видео:
+
+  https://rutube.ru/video/private/b34e070b3a625a1f39ea206079155eac/?p=r2vcwKr2m_nnYMwFk9JGuw
+
+  https://rutube.ru/video/private/df58cb2a1033ac4c8858e2f0f658eaaf/?p=9nFu2Z1wbAV-yGhsm3c8SQ
+  
+- `Практика 4-3.r` — функциональное обогащение, интеграция с моделями классификации
+      
+  Видео:
+
+  https://rutube.ru/video/private/263af26ed15b5c94c5b74e52282210a0/?p=_hMd_oDjOikVaHPLhNVlbQ
+
+  https://rutube.ru/video/private/729c3200fe8140f9ffcf40e4817b566f/?p=sCLLHihd8u8Uz6ko2vrr3w
 
 **Задания:** 7–8
 
