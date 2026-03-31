@@ -38,7 +38,7 @@ setEnrichrSite("Enrichr")
 dbs_available <- listEnrichrDbs()
 
 # Используемые базы
-dbs <- c("GO_Biological_Process_2025", "KEGG_2021")
+dbs <- c("GO_Biological_Process_2025", "KEGG_2026")
 
 # ── 5. Обогащение GO Biological Process ──────────────────────
 enrich_res <- enrichr(hub_symbols, dbs)
