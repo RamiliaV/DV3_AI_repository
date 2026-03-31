@@ -24,13 +24,12 @@ load("GSE45827_modules.RData")
 # Доступны: datExpr, pheno, subtype, MEs,
 #           module_colors, kME, hub_genes, target_module
 
-cat("Hub-генов:", nrow(hub_genes), "\n")
-cat("Символы:", hub_genes$symbol, "\n")
+cat("Hub-гены:", unique(hub_genes$symbol), "\n")
 
 # ── ЧАСТЬ A: ФУНКЦИОНАЛЬНОЕ ОБОГАЩЕНИЕ ──────────────────────
 
 # ── 3. Подготовка списка hub-генов ───────────────────────────
-hub_symbols <- hub_genes$symbol
+hub_symbols <- unique(hub_genes$symbol)
 hub_symbols <- hub_symbols[!is.na(hub_symbols) & hub_symbols != ""]
 cat("Генов для обогащения:", length(hub_symbols), "\n")
 
@@ -39,7 +38,7 @@ setEnrichrSite("Enrichr")
 dbs_available <- listEnrichrDbs()
 
 # Используемые базы
-dbs <- c("GO_Biological_Process_2025", "KEGG_2026")
+dbs <- c("GO_Biological_Process_2025", "KEGG_2021")
 
 # ── 5. Обогащение GO Biological Process ──────────────────────
 enrich_res <- enrichr(hub_symbols, dbs)
@@ -53,7 +52,7 @@ cat("Топ-15 GO BP терминов:\n")
 print(go_res[, c("Term", "Overlap", "Adjusted.P.value")])
 
 # ── 6. Обогащение KEGG ───────────────────────────────────────
-kegg_res <- enrich_res[["KEGG_2026"]] |>
+kegg_res <- enrich_res[["KEGG_2021"]] |>
   filter(Adjusted.P.value < 0.05) |>
   arrange(Adjusted.P.value) |>
   head(15)

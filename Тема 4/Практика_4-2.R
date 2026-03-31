@@ -5,10 +5,10 @@
 
 # ── 1. Загрузка библиотек ────────────────────────────────────
 # options(repos = "https://mirror.truenetwork.ru/CRAN/")
-library(WGCNA)
 library(ggplot2)
 library(dplyr)
 library(gridExtra)
+library(WGCNA)
 
 options(stringsAsFactors = FALSE)
 allowWGCNAThreads()
@@ -38,6 +38,7 @@ bwnet <- blockwiseModules(
 
 # Сохраняем сразу — пересчёт дорогой
 save(bwnet, file = "GSE45827_bwnet.RData")
+# load('GSE45827_bwnet.RData')
 
 # ── 4. Таблица модулей ───────────────────────────────────────
 module_colors <- bwnet$colors
@@ -157,15 +158,15 @@ hub_genes$symbol <- hub_symbols
 # Убираем зонды без аннотации
 hub_genes <- hub_genes[!is.na(hub_genes$symbol), ]
 
-cat("Hub-генов с аннотацией:", nrow(hub_genes), "\n")
+cat("Hub-генов с аннотацией:", unique(hub_genes$symbol), "\n")
 print(hub_genes[, c("gene", "symbol", "kME")])
 
 # Обновляем CSV
 write.csv(hub_genes, "hub_genes_GSE45827.csv", row.names = FALSE)
 
 # ── 12. Визуализация kME топ-20 ─────────────────────────────
-p_hub <- ggplot(hub_genes, aes(x = reorder(symbol, kME), y = kME)) +
-  geom_col(fill = target_module, alpha = 0.85) +
+p_hub <- ggplot(hub_genes, aes(x = paste(gene, symbol, sep = "_"), y = kME)) +
+  geom_col(alpha = 0.85) +
   coord_flip() +
   labs(
     title = paste("Топ-20 hub-генов модуля", target_module),

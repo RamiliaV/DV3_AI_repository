@@ -31,7 +31,7 @@ expr_raw <- exprs(gse)
 pheno    <- pData(gse)
 
 cat("Размерность исходной матрицы:", dim(expr_raw), "\n")
-# Ожидается ~30000 генов × 151 образец
+# Ожидается ~30000 генов × 155 образец
 
 # ── 3. Разметка подтипов ─────────────────────────────────────
 # Переменная с подтипом находится в столбце "characteristics_ch1.1"
@@ -40,13 +40,11 @@ head(pheno[, grep("characteristics|subtype|type", colnames(pheno),
                   ignore.case = TRUE)])
 
 # Извлечение подтипа (адаптируйте имя столбца по выводу выше)
-subtype_raw <- pheno$`characteristics_ch1.1`
-subtype <- gsub("tissue: ", "", subtype_raw)
-subtype <- trimws(subtype)
+subtype <- pheno$`tumor subtype:ch1`
 table(subtype)
 
-# Удаление клеточных линий: оставляем только тканевые образцы
-keep_samples <- subtype != "cell line"
+# Удаление клеточных линий и норму: оставляем только тканевые образцы
+keep_samples <- subtype != "N/A" & !is.na(subtype)
 expr_raw <- expr_raw[, keep_samples]
 pheno    <- pheno[keep_samples, ]
 subtype  <- subtype[keep_samples]
@@ -75,6 +73,7 @@ cut_height <- 250
 keep <- sampleTree$height < cut_height
 
 expr_raw <- expr_raw[, keep]
+
 pheno    <- pheno[keep, ]
 subtype  <- subtype[keep]
 
@@ -101,7 +100,7 @@ gene_var  <- apply(datExpr_full, 2, var)
 top_genes <- order(gene_var, decreasing = TRUE)[1:5000]
 datExpr   <- datExpr_full[, top_genes]
 
-cat("Финальная матрица для WGCNA:", dim(datExpr), "\n")  # 137 × 5000
+cat("Финальная матрица для WGCNA:", dim(datExpr), "\n")  # 126 × 5000
 
 # Визуализация распределения дисперсий
 var_df <- data.frame(variance = sort(gene_var, decreasing = TRUE),
@@ -161,7 +160,7 @@ softPower <- sft_df$Power[which(sft_df$R2 >= 0.85)[1]]
 cat("Выбранный soft-threshold power:", softPower, "\n")
 
 # Если автоматический выбор не сработал — задайте вручную:
-# softPower <- 12
+# softPower <- 11
 
 # ── 10. Сохранение объектов для Практики 2 ──────────────────
 save(datExpr, pheno, subtype, softPower,
