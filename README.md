@@ -93,8 +93,28 @@ https://rutube.ru/video/private/bf23c8680008ec83f13530a9979f81c7/?p=JDnAZjM_qHY7
 
 **Практика:**
 - `Практика 3-1.r` — кривые Каплана–Мейера, лог-ранговый тест
+  
+  Видео:
+  
+  https://rutube.ru/video/private/e221e8561df26aeb49659c125e3581df/?p=kydm3SThgyVDambUEZf1vQ
+  
+  https://rutube.ru/video/private/11394c09ea1f520b4bc4f63d529b1ee8/?p=D5h3ElGyn0URryBXxTxQqg
+
 - `Практика 3-2.r` — одномерная и многомерная модель Кокса, Hazard Ratio
+    
+  Видео:
+
+  https://rutube.ru/video/private/13f6d46504e54a3d32667eeed153e816/?p=m4R_iUqjThUK5EjGS9SQiA
+
+  https://rutube.ru/video/private/88e1c0df61d3bd2ecdc52f07551e083c/?p=ljPpUNLYGlh2DuFhxxKc5g
+
 - `Практика 3-3.r` — продвинутые модели выживаемости (конкурирующие риски, time-dependent ковариаты, LASSO Cox)
+
+  Видео:
+
+  https://rutube.ru/video/private/1340aa91663e731715d3c0edad337eb2/?p=Vwjwz7K9iGw0iNEYUEpq3g
+
+  https://rutube.ru/video/private/000f6933f0c1dc77d07e62026ccc3666/?p=QjQHPLNT3jd2QJ3jO8YmCQ
 
 **Задания:** 5–6
 
