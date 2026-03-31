@@ -250,6 +250,4 @@ https://rutube.ru/video/private/b287727175d03716e8f54b7c1eacc782/?p=WXSMCKu6XGqj
 
 ---
 
-Репозиторий пополняется по мере прохождения курса.
-
 Email для связи: r.mukhamadeeva@yandex.ru
