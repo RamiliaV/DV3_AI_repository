@@ -147,7 +147,7 @@ https://rutube.ru/video/private/ecb65eee35adbadc019fa082d46309b1/?p=k_8Qg48B2AOt
 
   https://rutube.ru/video/private/b34e070b3a625a1f39ea206079155eac/?p=r2vcwKr2m_nnYMwFk9JGuw
 
-  https://rutube.ru/video/private/df58cb2a1033ac4c8858e2f0f658eaaf/?p=9nFu2Z1wbAV-yGhsm3c8SQ
+  https://rutube.ru/video/private/41e9bb8057d330907627e1ea809b4525/?p=nKbpG2VQ-L3UUpc92HmCmQ
   
 - `Практика 4-3.r` — функциональное обогащение, интеграция с моделями классификации
       
